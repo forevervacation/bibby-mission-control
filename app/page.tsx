@@ -6,6 +6,7 @@ import BibbyDashboard from './components/BibbyDashboard';
 import ContentPipeline from './components/ContentPipeline';
 import CalendarView from './components/CalendarView';
 import QuickActions from './components/QuickActions';
+import MemoryView from './components/MemoryView';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -55,6 +56,7 @@ export default function Home() {
               { id: 'analytics', label: '📈 Analytics', icon: '📈' },
               { id: 'content', label: '📝 Content', icon: '📝' },
               { id: 'calendar', label: '📅 Calendar', icon: '📅' },
+              { id: 'memory', label: '🧠 Memory', icon: '🧠' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -88,6 +90,7 @@ export default function Home() {
         {activeTab === 'analytics' && <BibbyDashboard />}
         {activeTab === 'content' && <ContentPipeline />}
         {activeTab === 'calendar' && <CalendarView />}
+        {activeTab === 'memory' && <MemoryView />}
       </main>
     </div>
   );
