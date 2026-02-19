@@ -5,7 +5,7 @@ import TaskModal from './TaskModal';
 import { supabase } from '@/lib/supabase';
 
 interface Task {
-  id: number;
+  id?: number;
   title: string;
   description?: string;
   priority?: 'High' | 'Medium' | 'Low';
