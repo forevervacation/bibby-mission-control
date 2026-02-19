@@ -7,6 +7,7 @@ import ContentPipeline from './components/ContentPipeline';
 import CalendarView from './components/CalendarView';
 import QuickActions from './components/QuickActions';
 import MemoryView from './components/MemoryView';
+import TeamView from './components/TeamView';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -57,6 +58,7 @@ export default function Home() {
               { id: 'content', label: '📝 Content', icon: '📝' },
               { id: 'calendar', label: '📅 Calendar', icon: '📅' },
               { id: 'memory', label: '🧠 Memory', icon: '🧠' },
+              { id: 'team', label: '👥 Team', icon: '👥' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -91,6 +93,7 @@ export default function Home() {
         {activeTab === 'content' && <ContentPipeline />}
         {activeTab === 'calendar' && <CalendarView />}
         {activeTab === 'memory' && <MemoryView />}
+        {activeTab === 'team' && <TeamView />}
       </main>
     </div>
   );
