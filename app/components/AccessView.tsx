@@ -122,6 +122,22 @@ export default function AccessView() {
       ],
     },
     {
+      id: 'google-drive',
+      name: 'Google Drive',
+      icon: '📄',
+      status: 'connected',
+      category: 'infrastructure',
+      connectedDate: '2026-02-19',
+      description: 'Document creation and storage for deliverables',
+      details: [
+        { label: 'Shared Folder', value: 'Scotty (OpenClaw) - Work Docs' },
+        { label: 'Folder ID', value: '1TJAbzJqH3_ml_pFRF1NJxCtj8P5uN4dE' },
+        { label: 'Service Account', value: 'ben-s-openclaw-scotty@octopost-ai.iam.gserviceaccount.com' },
+        { label: 'Permissions', value: 'Editor - Can create & edit documents' },
+        { label: 'Note', value: 'Docs API enabled, storage quota needs increase' },
+      ],
+    },
+    {
       id: 'stripe',
       name: 'Stripe',
       icon: '💳',
