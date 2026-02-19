@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 
 interface AnalyticsData {
   activeUsers: number;
-  freeUsers: number;
-  paidUsers: number;
+  totalUsers: number;
+  newUsers: number;
   sessions: number;
   pageViews: number;
   topPages: { page: string; views: number }[];
@@ -20,10 +20,10 @@ export default function BibbyDashboard({ compact = false }: { compact?: boolean 
     // Mock data for now - we'll connect to API later
     const mockData: AnalyticsData = {
       activeUsers: 1,
-      freeUsers: 51,
-      paidUsers: 0,
-      sessions: 82,
-      pageViews: 303,
+      totalUsers: 52,
+      newUsers: 29,
+      sessions: 86,
+      pageViews: 316,
       topPages: [
         { page: '/', views: 79 },
         { page: '/dashboard', views: 44 },
@@ -71,13 +71,13 @@ export default function BibbyDashboard({ compact = false }: { compact?: boolean 
           <p className="text-white/60 text-xs uppercase tracking-wide">Active Now</p>
           <p className="text-white text-3xl font-bold mt-1">🔴 {data.activeUsers}</p>
         </div>
-        <div className="bg-white/5 rounded-xl p-4 border-l-4 border-blue-500">
-          <p className="text-white/60 text-xs uppercase tracking-wide">Free Users (7d)</p>
-          <p className="text-white text-3xl font-bold mt-1">🆓 {data.freeUsers}</p>
+        <div className="bg-white/5 rounded-xl p-4">
+          <p className="text-white/60 text-xs uppercase tracking-wide">Total Users (7d)</p>
+          <p className="text-white text-3xl font-bold mt-1">{data.totalUsers}</p>
         </div>
-        <div className="bg-white/5 rounded-xl p-4 border-l-4 border-green-500">
-          <p className="text-white/60 text-xs uppercase tracking-wide">Paid Users (7d)</p>
-          <p className="text-white text-3xl font-bold mt-1">💎 {data.paidUsers}</p>
+        <div className="bg-white/5 rounded-xl p-4">
+          <p className="text-white/60 text-xs uppercase tracking-wide">New Signups (7d)</p>
+          <p className="text-white text-3xl font-bold mt-1">{data.newUsers}</p>
         </div>
         <div className="bg-white/5 rounded-xl p-4">
           <p className="text-white/60 text-xs uppercase tracking-wide">Sessions (7d)</p>
