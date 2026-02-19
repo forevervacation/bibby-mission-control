@@ -29,16 +29,22 @@ export default function MemoryView() {
   const fetchMemories = async () => {
     try {
       const response = await fetch('/api/memories');
-      if (!response.ok) throw new Error('Failed to fetch memories');
       
-      const data = await response.json();
-      setMemories(data.memories || []);
-      setFilteredMemories(data.memories || []);
-      setLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.memories && data.memories.length > 0) {
+          setMemories(data.memories);
+          setFilteredMemories(data.memories);
+          setLoading(false);
+          return;
+        }
+      }
     } catch (error) {
       console.error('Error fetching memories:', error);
-      // Fallback to mock data if API fails
-      const mockMemories: MemoryEntry[] = [
+    }
+    
+    // Always use built-in memory data as fallback
+    const builtInMemories: MemoryEntry[] = [
         {
           id: '1',
           title: 'MEMORY.md - Long-term Memory',
@@ -118,10 +124,9 @@ export default function MemoryView() {
         },
       ];
 
-      setMemories(mockMemories);
-      setFilteredMemories(mockMemories);
-      setLoading(false);
-    }
+    setMemories(builtInMemories);
+    setFilteredMemories(builtInMemories);
+    setLoading(false);
   };
 
   const filterMemories = () => {
