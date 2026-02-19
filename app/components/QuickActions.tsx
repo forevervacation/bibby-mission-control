@@ -3,8 +3,8 @@
 export default function QuickActions() {
   const actions = [
     { icon: '🔴', label: 'Live Users', value: '1 active', color: 'from-red-500 to-pink-500' },
-    { icon: '👥', label: 'Total Users (7d)', value: '51', color: 'from-blue-500 to-cyan-500' },
-    { icon: '🆕', label: 'New Signups (7d)', value: '29', color: 'from-green-500 to-emerald-500' },
+    { icon: '🆓', label: 'Free Users (7d)', value: '51', color: 'from-blue-500 to-cyan-500' },
+    { icon: '💎', label: 'Paid Users (7d)', value: '0', color: 'from-green-500 to-emerald-500' },
     { icon: '📄', label: 'Page Views (7d)', value: '303', color: 'from-purple-500 to-pink-500' },
   ];
 
