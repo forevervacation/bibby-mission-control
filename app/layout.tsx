@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mission Control - Bibby Dashboard",
+  title: "🚀 Mission Control - Bibby Dashboard",
   description: "Your AI-powered mission control for managing tasks, analytics, and content",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
