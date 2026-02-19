@@ -1,122 +1,291 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-interface CalendarEvent {
-  id: number;
-  title: string;
-  date: string;
-  time: string;
-  type: 'task' | 'meeting' | 'deadline' | 'reminder';
-  assignedTo?: 'Ben' | 'Scotty';
+interface CronJob {
+  id: string;
+  name: string;
+  schedule: string;
+  nextRun: string;
+  type: 'analytics' | 'brief' | 'research' | 'reminder' | 'system';
+  status: 'active' | 'paused';
+  description?: string;
 }
 
 export default function CalendarView() {
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    { id: 1, title: 'Blog post deadline: AI Automation Guide', date: '2026-02-21', time: '5:00 PM', type: 'deadline', assignedTo: 'Scotty' },
-    { id: 2, title: 'Check Bibby signups', date: '2026-02-20', time: '9:00 AM', type: 'task', assignedTo: 'Scotty' },
-    { id: 3, title: 'Weekly marketing review', date: '2026-02-22', time: '2:00 PM', type: 'meeting', assignedTo: 'Ben' },
-  ]);
+  const [jobs, setJobs] = useState<CronJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'week' | 'list'>('week');
 
-  const today = new Date();
-  const upcomingEvents = events
-    .filter(e => new Date(e.date) >= today)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  useEffect(() => {
+    fetchJobs();
+    const interval = setInterval(fetchJobs, 60000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const response = await fetch('/api/cron-jobs');
+      const data = await response.json();
+      setJobs(data.jobs || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching cron jobs:', error);
+      setLoading(false);
+    }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'task': return 'bg-blue-500';
-      case 'meeting': return 'bg-purple-500';
-      case 'deadline': return 'bg-red-500';
-      case 'reminder': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
+      case 'analytics': return 'bg-blue-500/20 border-blue-500/50 text-blue-300';
+      case 'brief': return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300';
+      case 'research': return 'bg-purple-500/20 border-purple-500/50 text-purple-300';
+      case 'reminder': return 'bg-green-500/20 border-green-500/50 text-green-300';
+      case 'system': return 'bg-gray-500/20 border-gray-500/50 text-gray-300';
+      default: return 'bg-white/10 border-white/30 text-white';
     }
   };
 
   const getTypeEmoji = (type: string) => {
     switch (type) {
-      case 'task': return '✅';
-      case 'meeting': return '👥';
-      case 'deadline': return '⏰';
+      case 'analytics': return '📊';
+      case 'brief': return '📋';
+      case 'research': return '🔍';
       case 'reminder': return '🔔';
+      case 'system': return '⚙️';
       default: return '📅';
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const getWeekDays = () => {
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow';
-    } else {
-      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const days = [];
+    const currentDay = today.getDay();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - currentDay + i);
+      days.push(date);
     }
+    
+    return days;
   };
 
+  const getJobsForDay = (date: Date) => {
+    return jobs.filter(job => {
+      const nextRun = new Date(job.nextRun);
+      return nextRun.toDateString() === date.toDateString();
+    });
+  };
+
+  const getAlwaysRunningJobs = () => {
+    return jobs.filter(job => 
+      job.schedule.includes('every') && 
+      (job.schedule.includes('minute') || job.schedule.includes('hour'))
+    );
+  };
+
+  const getUpcomingJobs = () => {
+    const now = new Date();
+    return jobs
+      .filter(job => new Date(job.nextRun) > now)
+      .sort((a, b) => new Date(a.nextRun).getTime() - new Date(b.nextRun).getTime())
+      .slice(0, 5);
+  };
+
+  const formatTimeUntil = (dateStr: string) => {
+    const now = new Date();
+    const target = new Date(dateStr);
+    const diffMs = target.getTime() - now.getTime();
+    
+    if (diffMs < 0) return 'overdue';
+    
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 60) return `in ${diffMins}m`;
+    if (diffHours < 24) return `in ${diffHours}h`;
+    return `in ${diffDays}d`;
+  };
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-white/20 rounded w-48"></div>
+          <div className="h-64 bg-white/20 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const weekDays = getWeekDays();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Calendar & Schedule</h2>
-        <button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg transition-all">
-          + Add Event
-        </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Scheduled Tasks</h2>
+            <p className="text-white/60 text-sm">Scotty's automated routines</p>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setView('week')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                view === 'week'
+                  ? 'bg-white text-gray-900'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Week
+            </button>
+            <button
+              onClick={() => setView('list')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                view === 'list'
+                  ? 'bg-white text-gray-900'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              List
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Upcoming Events */}
-      <div className="space-y-4">
-        <h3 className="text-white font-semibold mb-3">📅 Upcoming Events</h3>
-        
-        {upcomingEvents.length === 0 ? (
-          <p className="text-white/40 text-center py-12 italic">No upcoming events</p>
-        ) : (
-          <div className="space-y-3">
-            {upcomingEvents.map((event) => (
+      {/* Always Running Section */}
+      {getAlwaysRunningJobs().length > 0 && (
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+            <span>⚡</span>
+            <span>Always Running</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {getAlwaysRunningJobs().map((job) => (
               <div
-                key={event.id}
-                className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                key={job.id}
+                className={`${getTypeColor(job.type)} rounded-lg p-3 border`}
               >
-                <div className="flex items-start space-x-4">
-                  <div className={`${getTypeColor(event.type)} text-white text-2xl w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    {getTypeEmoji(event.type)}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <h4 className="text-white font-medium">{event.title}</h4>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-white/60">
-                      <span>📅 {formatDate(event.date)}</span>
-                      <span>🕐 {event.time}</span>
-                      {event.assignedTo && (
-                        <span className="bg-white/10 text-white px-2 py-0.5 rounded">
-                          {event.assignedTo}
-                        </span>
-                      )}
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-xl">{getTypeEmoji(job.type)}</span>
+                  <span className="font-medium text-sm">{job.name}</span>
+                </div>
+                <p className="text-xs opacity-80">{job.schedule}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {view === 'week' ? (
+        /* Weekly Calendar View */
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+          <div className="grid grid-cols-7 gap-3">
+            {weekDays.map((date, index) => {
+              const isToday = date.toDateString() === new Date().toDateString();
+              const dayJobs = getJobsForDay(date);
+              
+              return (
+                <div key={index} className="space-y-2">
+                  <div className={`text-center pb-2 border-b ${
+                    isToday ? 'border-purple-500' : 'border-white/10'
+                  }`}>
+                    <div className={`text-sm font-medium ${
+                      isToday ? 'text-purple-300' : 'text-white/60'
+                    }`}>
+                      {dayNames[date.getDay()]}
+                    </div>
+                    <div className={`text-2xl font-bold ${
+                      isToday ? 'text-white' : 'text-white/80'
+                    }`}>
+                      {date.getDate()}
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    {dayJobs.length === 0 ? (
+                      <div className="text-white/30 text-xs text-center py-4 italic">
+                        No tasks
+                      </div>
+                    ) : (
+                      dayJobs.map((job) => (
+                        <div
+                          key={job.id}
+                          className={`${getTypeColor(job.type)} rounded-lg p-2 border text-xs cursor-pointer hover:scale-105 transition-transform`}
+                          title={job.description}
+                        >
+                          <div className="font-medium mb-1 line-clamp-2">{job.name}</div>
+                          <div className="opacity-80">{formatTime(job.nextRun)}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* List View */
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+          <div className="space-y-3">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white/5 rounded-lg p-4 border border-white/10 hover:bg-white/10 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 flex-1">
+                    <span className="text-2xl">{getTypeEmoji(job.type)}</span>
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium mb-1">{job.name}</h4>
+                      {job.description && (
+                        <p className="text-white/60 text-sm mb-2">{job.description}</p>
+                      )}
+                      <div className="flex items-center space-x-4 text-xs text-white/60">
+                        <span>📅 {job.schedule}</span>
+                        <span>⏰ Next: {formatTime(job.nextRun)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(job.type)}`}>
+                    {job.type}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Quick Stats */}
-      <div className="mt-6 pt-6 border-t border-white/10">
-        <div className="grid grid-cols-4 gap-3">
-          {['task', 'meeting', 'deadline', 'reminder'].map((type) => {
-            const count = events.filter(e => e.type === type).length;
-            return (
-              <div key={type} className="bg-white/5 rounded-lg p-3 text-center">
-                <div className="text-2xl mb-1">{getTypeEmoji(type)}</div>
-                <p className="text-white text-xl font-bold">{count}</p>
-                <p className="text-white/60 text-xs capitalize">{type}s</p>
+      {/* Next Up Section */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+          <span>⏭️</span>
+          <span>Next Up</span>
+        </h3>
+        <div className="space-y-2">
+          {getUpcomingJobs().map((job) => (
+            <div
+              key={job.id}
+              className="flex items-center justify-between bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">{getTypeEmoji(job.type)}</span>
+                <span className="text-white font-medium text-sm">{job.name}</span>
               </div>
-            );
-          })}
+              <span className="text-white/60 text-sm">{formatTimeUntil(job.nextRun)}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
