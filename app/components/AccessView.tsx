@@ -51,6 +51,21 @@ export default function AccessView() {
       ],
     },
     {
+      id: 'search-console',
+      name: 'Google Search Console',
+      icon: '🔍',
+      status: 'connected',
+      category: 'analytics',
+      connectedDate: '2026-02-19',
+      description: 'SEO metrics, search queries, keyword rankings, and CTR data',
+      details: [
+        { label: 'Property', value: 'sc-domain:gobibby.com' },
+        { label: 'Service Account', value: 'ben-s-openclaw-scotty@octopost-ai.iam.gserviceaccount.com' },
+        { label: 'Tracking', value: 'Search queries, impressions, clicks, CTR, position' },
+        { label: 'Key Insight', value: '"bibby ai" ranks at position #3!' },
+      ],
+    },
+    {
       id: 'vercel',
       name: 'Vercel',
       icon: '▲',

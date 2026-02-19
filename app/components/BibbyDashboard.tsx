@@ -10,6 +10,7 @@ interface AnalyticsData {
   pageViews: number;
   topPages: { page: string; views: number }[];
   trafficSources: { source: string; sessions: number }[];
+  searchQueries?: { query: string; clicks: number; impressions: number; ctr: number; position: number }[];
 }
 
 export default function BibbyDashboard({ compact = false }: { compact?: boolean }) {
@@ -33,6 +34,11 @@ export default function BibbyDashboard({ compact = false }: { compact?: boolean 
         { source: 'google', sessions: 23 },
         { source: 'linkedin.com', sessions: 15 },
         { source: '(direct)', sessions: 14 },
+      ],
+      searchQueries: [
+        { query: 'bibby ai', clicks: 1, impressions: 34, ctr: 2.9, position: 3.1 },
+        { query: 'bibby', clicks: 1, impressions: 22, ctr: 4.5, position: 24.3 },
+        { query: 'ai social media scheduler', clicks: 0, impressions: 10, ctr: 0, position: 78.1 },
       ],
     };
     
@@ -116,6 +122,34 @@ export default function BibbyDashboard({ compact = false }: { compact?: boolean 
               ))}
             </div>
           </div>
+
+          {/* Search Console - Top Queries */}
+          {data.searchQueries && data.searchQueries.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-white font-semibold mb-3">🔍 Top Search Queries (7d)</h3>
+              <div className="space-y-2">
+                {data.searchQueries.map((query, idx) => (
+                  <div key={idx} className="bg-white/5 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white text-sm font-medium">{query.query}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        query.position <= 10 ? 'bg-green-500/20 text-green-300' :
+                        query.position <= 30 ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-red-500/20 text-red-300'
+                      }`}>
+                        #{query.position.toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-4 text-xs text-white/60">
+                      <span>👆 {query.clicks} clicks</span>
+                      <span>👀 {query.impressions} views</span>
+                      <span>📊 {query.ctr.toFixed(1)}% CTR</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
