@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import TaskModal from './TaskModal';
 import { supabase } from '@/lib/supabase';
 
+interface Comment {
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
 interface Task {
   id?: number;
   title: string;
@@ -13,6 +19,8 @@ interface Task {
   status: 'backlog' | 'todo' | 'inProgress' | 'review' | 'done';
   notes?: string;
   links?: string[];
+  due_date?: string;
+  comments?: Comment[];
 }
 
 export default function TasksBoard({ compact = false }: { compact?: boolean }) {
@@ -63,6 +71,8 @@ export default function TasksBoard({ compact = false }: { compact?: boolean }) {
             status: task.status,
             notes: task.notes,
             links: task.links,
+            due_date: task.due_date,
+            comments: task.comments,
             updated_at: new Date().toISOString(),
           })
           .eq('id', task.id);
@@ -80,6 +90,8 @@ export default function TasksBoard({ compact = false }: { compact?: boolean }) {
             status: task.status,
             notes: task.notes,
             links: task.links,
+            due_date: task.due_date,
+            comments: task.comments,
           }]);
 
         if (error) throw error;
@@ -109,6 +121,23 @@ export default function TasksBoard({ compact = false }: { compact?: boolean }) {
   const openTaskModal = (task?: Task) => {
     setSelectedTask(task || null);
     setIsModalOpen(true);
+  };
+
+  const isOverdue = (dueDate?: string) => {
+    if (!dueDate) return false;
+    return new Date(dueDate) < new Date();
+  };
+
+  const formatDueDate = (dueDate?: string) => {
+    if (!dueDate) return null;
+    const date = new Date(dueDate);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   const columns = compact 
@@ -192,11 +221,27 @@ export default function TasksBoard({ compact = false }: { compact?: boolean }) {
                         {task.description && !compact && (
                           <p className="text-white/60 text-xs mt-1 line-clamp-2">{task.description}</p>
                         )}
-                        {task.links && task.links.length > 0 && (
-                          <div className="mt-2">
-                            <span className="text-blue-300 text-xs">🔗 {task.links.length} link(s)</span>
-                          </div>
-                        )}
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {task.due_date && (
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              isOverdue(task.due_date) 
+                                ? 'bg-red-500/20 text-red-300' 
+                                : 'bg-blue-500/20 text-blue-300'
+                            }`}>
+                              📅 {formatDueDate(task.due_date)}
+                            </span>
+                          )}
+                          {task.links && task.links.length > 0 && (
+                            <span className="text-blue-300 text-xs bg-blue-500/10 px-2 py-0.5 rounded">
+                              🔗 {task.links.length}
+                            </span>
+                          )}
+                          {task.comments && task.comments.length > 0 && (
+                            <span className="text-purple-300 text-xs bg-purple-500/10 px-2 py-0.5 rounded">
+                              💬 {task.comments.length}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center justify-between mt-2">
                           {task.priority && (
                             <span className="text-xs text-white/60">

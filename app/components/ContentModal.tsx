@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from 'react';
 
+interface Comment {
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
 interface ContentItem {
   id?: number;
   title: string;
@@ -10,6 +16,8 @@ interface ContentItem {
   assigned_to?: 'Ben' | 'Scotty';
   notes?: string;
   links?: string[];
+  due_date?: string;
+  comments?: Comment[];
 }
 
 interface ContentModalProps {
@@ -27,9 +35,11 @@ export default function ContentModal({ content, isOpen, onClose, onSave, onDelet
       type: 'blog',
       stage: 'idea',
       assigned_to: 'Scotty',
+      comments: [],
     }
   );
   const [newLink, setNewLink] = useState('');
+  const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
     if (content) {
@@ -60,6 +70,33 @@ export default function ContentModal({ content, isOpen, onClose, onSave, onDelet
       ...formData,
       links: formData.links?.filter((_, i) => i !== index),
     });
+  };
+
+  const addComment = () => {
+    if (newComment.trim()) {
+      const comment: Comment = {
+        author: 'Ben',
+        text: newComment.trim(),
+        timestamp: new Date().toISOString(),
+      };
+      setFormData({
+        ...formData,
+        comments: [...(formData.comments || []), comment],
+      });
+      setNewComment('');
+    }
+  };
+
+  const formatCommentDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -151,6 +188,58 @@ export default function ContentModal({ content, isOpen, onClose, onSave, onDelet
                   Add
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Due Date */}
+          <div>
+            <label className="block text-white/80 text-sm font-medium mb-2">
+              Due Date
+            </label>
+            <input
+              type="date"
+              value={formData.due_date || ''}
+              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          {/* Comments Section */}
+          <div>
+            <label className="block text-white/80 text-sm font-medium mb-2">
+              Comments & Discussion
+            </label>
+            <div className="bg-white/5 rounded-lg p-4 space-y-3 max-h-60 overflow-y-auto">
+              {formData.comments && formData.comments.length > 0 ? (
+                formData.comments.map((comment, index) => (
+                  <div key={index} className="bg-white/5 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-white font-medium text-sm">{comment.author}</span>
+                      <span className="text-white/40 text-xs">{formatCommentDate(comment.timestamp)}</span>
+                    </div>
+                    <p className="text-white/80 text-sm">{comment.text}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-white/40 text-sm text-center py-4 italic">No comments yet</p>
+              )}
+            </div>
+            <div className="mt-3 flex space-x-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addComment())}
+                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                placeholder="Add a comment..."
+              />
+              <button
+                type="button"
+                onClick={addComment}
+                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              >
+                Send
+              </button>
             </div>
           </div>
 

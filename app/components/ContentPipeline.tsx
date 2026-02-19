@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import ContentModal from './ContentModal';
 import { supabase } from '@/lib/supabase';
 
+interface Comment {
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
 interface ContentItem {
   id?: number;
   title: string;
@@ -12,6 +18,8 @@ interface ContentItem {
   assigned_to?: 'Ben' | 'Scotty';
   notes?: string;
   links?: string[];
+  due_date?: string;
+  comments?: Comment[];
 }
 
 export default function ContentPipeline() {
@@ -59,6 +67,8 @@ export default function ContentPipeline() {
             assigned_to: contentItem.assigned_to,
             notes: contentItem.notes,
             links: contentItem.links,
+            due_date: contentItem.due_date,
+            comments: contentItem.comments,
             updated_at: new Date().toISOString(),
           })
           .eq('id', contentItem.id);
@@ -75,6 +85,8 @@ export default function ContentPipeline() {
             assigned_to: contentItem.assigned_to,
             notes: contentItem.notes,
             links: contentItem.links,
+            due_date: contentItem.due_date,
+            comments: contentItem.comments,
           }]);
 
         if (error) throw error;
@@ -120,6 +132,23 @@ export default function ContentPipeline() {
       case 'video': return '🎥';
       default: return '📄';
     }
+  };
+
+  const isOverdue = (dueDate?: string) => {
+    if (!dueDate) return false;
+    return new Date(dueDate) < new Date();
+  };
+
+  const formatDueDate = (dueDate?: string) => {
+    if (!dueDate) return null;
+    const date = new Date(dueDate);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   if (loading) {
@@ -179,11 +208,27 @@ export default function ContentPipeline() {
                             <p className="text-white text-sm font-medium leading-tight group-hover:text-purple-300 transition-colors">
                               {item.title}
                             </p>
-                            {item.links && item.links.length > 0 && (
-                              <div className="mt-2">
-                                <span className="text-blue-300 text-xs">🔗 {item.links.length} link(s)</span>
-                              </div>
-                            )}
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {item.due_date && (
+                                <span className={`text-xs px-2 py-0.5 rounded ${
+                                  isOverdue(item.due_date) 
+                                    ? 'bg-red-500/20 text-red-300' 
+                                    : 'bg-blue-500/20 text-blue-300'
+                                }`}>
+                                  📅 {formatDueDate(item.due_date)}
+                                </span>
+                              )}
+                              {item.links && item.links.length > 0 && (
+                                <span className="text-blue-300 text-xs bg-blue-500/10 px-2 py-0.5 rounded">
+                                  🔗 {item.links.length}
+                                </span>
+                              )}
+                              {item.comments && item.comments.length > 0 && (
+                                <span className="text-purple-300 text-xs bg-purple-500/10 px-2 py-0.5 rounded">
+                                  💬 {item.comments.length}
+                                </span>
+                              )}
+                            </div>
                             {item.assigned_to && (
                               <span className="inline-block mt-2 text-xs bg-white/10 text-white px-2 py-1 rounded">
                                 {item.assigned_to}
