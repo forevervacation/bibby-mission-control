@@ -327,7 +327,7 @@ export default function BlogOptimizationDoc() {
           <div className="mt-12 pt-8 border-t-2 border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">📎 Resources</h3>
             <div className="space-y-2">
-              <p><strong>Optimized Content:</strong> <a href="/workspace/blog-optimized.md" className="text-blue-600 hover:underline">blog-optimized.md</a> (ready to copy/paste)</p>
+              <p><strong>Optimized Content:</strong> <a href="/docs/blog-optimized-content" className="text-blue-600 hover:underline font-semibold">View & Copy Blog Post Content →</a> (ready to copy/paste into CMS)</p>
               <p><strong>Task Card:</strong> <a href="https://bibby-mission-control.vercel.app" className="text-blue-600 hover:underline" target="_blank">Mission Control - Task #7</a></p>
               <p><strong>Created:</strong> February 19, 2026</p>
               <p><strong>Next Review:</strong> March 19, 2026 (30-day check-in)</p>
