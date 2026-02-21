@@ -107,10 +107,21 @@ export default function TeamView() {
       tasksCompleted: 0,
     },
     {
+      id: 'hunter',
+      name: 'Hunter',
+      role: 'Lead Generation Specialist',
+      avatar: '🎯',
+      description: 'Dedicated expert in finding and verifying high-quality leads for cold outreach. Prioritizes 100% verified emails for target audiences.',
+      skills: ['Lead Generation', 'Email Verification', 'Research', 'Targeting'],
+      layer: 'specialist',
+      status: 'active',
+      tasksCompleted: 0,
+    },
+    {
       id: 'strategist',
       name: 'Strategist',
       role: 'Business Advisor',
-      avatar: '🎯',
+      avatar: '📈', // Changed from 🎯 to avoid conflict with Hunter
       description: 'High-level thinking and strategic planning. Helps with business decisions, pivots, and long-term roadmaps.',
       skills: ['Strategy', 'Planning', 'Business', 'Growth', 'Vision'],
       layer: 'meta',
@@ -139,6 +150,13 @@ export default function TeamView() {
       'Instantly.ai': 'bg-indigo-500/20 text-indigo-300',
       'Lead Gen': 'bg-green-500/20 text-green-300',
       'Conversion': 'bg-pink-500/20 text-pink-300',
+      'Lead Generation': 'bg-green-500/20 text-green-300',
+      'Email Verification': 'bg-blue-500/20 text-blue-300',
+      'Targeting': 'bg-red-500/20 text-red-300',
+      'Business': 'bg-blue-500/20 text-blue-300',
+      'Growth': 'bg-green-500/20 text-green-300',
+      'Vision': 'bg-indigo-500/20 text-indigo-300',
+      'Planning': 'bg-gray-500/20 text-gray-300',
     };
     return colors[skill] || 'bg-white/10 text-white/80';
   };
@@ -180,7 +198,9 @@ export default function TeamView() {
                   ))}
                 </div>
                 <div className="flex items-center space-x-4 text-sm text-white/60">
-                  <span className="flex items-center space-x-1">
+                  <span className={`flex items-center space-x-1 ${
+                    leadAgent.status === 'active' ? 'text-green-400' : 'text-gray-400'
+                  }`}>
                     <span className={`w-2 h-2 rounded-full ${
                       leadAgent.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
                     }`}></span>
@@ -241,7 +261,9 @@ export default function TeamView() {
                 ))}
               </div>
               <div className="flex items-center justify-between text-xs text-white/40">
-                <span className="flex items-center space-x-1">
+                <span className={`flex items-center space-x-1 ${
+                  agent.status === 'active' ? 'text-green-400' : 'text-gray-400'
+                }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${
                     agent.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
                   }`}></span>
@@ -282,7 +304,9 @@ export default function TeamView() {
                           <p className="text-white/60 text-sm">{agent.role}</p>
                         </div>
                         <div className="flex items-center space-x-2 text-xs text-white/40">
-                          <span className="flex items-center space-x-1">
+                          <span className={`flex items-center space-x-1 ${
+                            agent.status === 'active' ? 'text-green-400' : 'text-gray-400'
+                          }`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${
                               agent.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
                             }`}></span>
@@ -327,7 +351,9 @@ export default function TeamView() {
                 <h2 className="text-3xl font-bold text-white mb-1">{selectedAgent.name}</h2>
                 <p className="text-purple-300 font-medium text-lg mb-3">{selectedAgent.role}</p>
                 <div className="flex items-center space-x-4 text-sm text-white/60 mb-4">
-                  <span className="flex items-center space-x-2">
+                  <span className={`flex items-center space-x-2 ${
+                    selectedAgent.status === 'active' ? 'text-green-400' : 'text-gray-400'
+                  }`}>
                     <span className={`w-3 h-3 rounded-full ${
                       selectedAgent.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
                     }`}></span>
