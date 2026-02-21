@@ -96,6 +96,17 @@ export default function TeamView() {
       tasksCompleted: 19,
     },
     {
+      id: 'outreach',
+      name: 'Outreach',
+      role: 'Cold Email Specialist',
+      avatar: '📧',
+      description: 'Dedicated Instantly.ai expert who builds and manages cold email campaigns. Writes killer sequences, manages lead lists, and optimizes for conversions to drive Bibby signups.',
+      skills: ['Cold Email', 'Copywriting', 'Instantly.ai', 'Lead Gen', 'Conversion'],
+      layer: 'specialist',
+      status: 'active',
+      tasksCompleted: 0,
+    },
+    {
       id: 'strategist',
       name: 'Strategist',
       role: 'Business Advisor',
@@ -123,6 +134,11 @@ export default function TeamView() {
       'UI Design': 'bg-pink-500/20 text-pink-300',
       'Analytics': 'bg-orange-500/20 text-orange-300',
       'Social Media': 'bg-purple-500/20 text-purple-300',
+      'Cold Email': 'bg-red-500/20 text-red-300',
+      'Copywriting': 'bg-yellow-500/20 text-yellow-300',
+      'Instantly.ai': 'bg-indigo-500/20 text-indigo-300',
+      'Lead Gen': 'bg-green-500/20 text-green-300',
+      'Conversion': 'bg-pink-500/20 text-pink-300',
     };
     return colors[skill] || 'bg-white/10 text-white/80';
   };
